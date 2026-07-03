@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FranchiseHub — Discover, Connect, and Grow with the Future of Franchising</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --primary:#2563EB;
+    --primary-dim:#2563EB1a;
+    --secondary:#0F172A;
+    --accent:#10B981;
+    --accent-dim:#10B9811a;
+    --bg:#F8FAFC;
+    --surface:#FFFFFF;
+    --surface-2:#F1F5F9;
+    --text:#111827;
+    --text-muted:#5B6472;
+    --border:#E2E8F0;
+    --shadow: 0 1px 2px rgba(15,23,42,.04), 0 8px 24px -12px rgba(15,23,42,.10);
+    --radius: 14px;
+  }
+  html[data-theme="dark"]{
+    --bg:#0B1220;
+    --surface:#131C2E;
+    --surface-2:#182338;
+    --text:#EEF2F7;
+    --text-muted:#93A0B4;
+    --border:#243247;
+    --primary-dim:#2563EB26;
+    --accent-dim:#10B98126;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -16px rgba(0,0,0,.55);
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    transition:background .35s ease, color .35s ease;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,h4{font-family:'Manrope',sans-serif; font-weight:800; letter-spacing:-0.02em; color:var(--text);}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  a{color:inherit; text-decoration:none;}
+  ul{list-style:none;}
+  img{max-width:100%; display:block;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 28px;}
+  section{position:relative;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--primary);
+    display:inline-flex; align-items:center; gap:8px; margin-bottom:14px;
+  }
+  .eyebrow::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--accent);}
+  .reveal{opacity:0; transform:translateY(22px); transition:opacity .7s ease, transform .7s ease;}
+  .reveal.in{opacity:1; transform:translateY(0);}
+
+  /* ---------- NAV ---------- */
+  header{
+    position:sticky; top:0; z-index:100;
+    background:color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+  }
+  nav{display:flex; align-items:center; justify-content:space-between; padding:16px 28px; max-width:1180px; margin:0 auto;}
+  .logo{display:flex; align-items:center; gap:10px; font-family:'Manrope',sans-serif; font-weight:800; font-size:19px;}
+  .logo-mark{width:30px; height:30px; position:relative; animation:logoFloat 7.5s ease-in-out infinite;}
+  .nav-links{display:flex; gap:30px; align-items:center;}
+  @keyframes logoFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);} }
+  .nav-links a{font-size:14.5px; font-weight:500; color:var(--text-muted); transition:color .2s;}
+  .nav-links a:hover{color:var(--text);}
+  .nav-cta{display:flex; align-items:center; gap:14px;}
+  .theme-toggle{
+    width:40px; height:40px; border-radius:10px; border:1px solid var(--border);
+    background:var(--surface); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; color:var(--text); font-size:16px;
+  }
+  .btn{
+    font-family:'Inter',sans-serif; font-weight:600; font-size:14.5px;
+    padding:11px 20px; border-radius:10px; border:1px solid transparent;
+    cursor:pointer; display:inline-flex; align-items:center; gap:8px;
+    transition:transform .15s ease, box-shadow .2s ease, background .2s ease;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-primary{background:var(--primary); color:#fff; box-shadow:0 6px 18px -6px #2563EB66;}
+  .btn-primary:hover{box-shadow:0 10px 24px -8px #2563EB88;}
+  .btn-ghost{background:transparent; color:var(--text); border-color:var(--border);}
+  .btn-ghost:hover{border-color:var(--primary); color:var(--primary);}
+  .btn-sm{padding:9px 16px; font-size:13.5px;}
+
+  @media (max-width:900px){ .nav-links{display:none;} }
+
+  /* ---------- HERO ---------- */
+  .hero{padding:88px 0 60px; position:relative; overflow:hidden;}
+  .hero::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:
+      radial-gradient(circle at 18% 14%, rgba(37,99,235,.16), transparent 20%),
+      radial-gradient(circle at 82% 28%, rgba(16,185,129,.14), transparent 18%),
+      radial-gradient(circle at 50% 96%, rgba(59,130,246,.08), transparent 12%);
+    opacity:.96;
+    animation:drift 18s ease-in-out infinite;
+  }
+  .hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:56px; align-items:center; position:relative; z-index:1;}
+  @media (max-width:960px){ .hero-grid{grid-template-columns:1fr;} }
+  .hero h1{font-size:clamp(34px,4.4vw,56px); line-height:1.06;}
+  @keyframes drift{
+    0%,100%{transform:translate(0,0);}
+    50%{transform:translate(12px,-16px);}
+  }
+  .hero h1 .hl{color:var(--primary);}
+  .hero p.lead{margin-top:20px; font-size:17.5px; line-height:1.65; color:var(--text-muted); max-width:520px;}
+  .hero-actions{display:flex; gap:12px; margin-top:32px; flex-wrap:wrap;}
+  .hero-actions .btn-link{padding:11px 4px; color:var(--text-muted); font-weight:600; font-size:14.5px; display:inline-flex; align-items:center; gap:6px;}
+  .hero-actions .btn-link:hover{color:var(--primary);}
+
+  .industries{display:flex; gap:10px; flex-wrap:wrap; margin-top:34px;}
+  .chip{
+    font-size:12.5px; font-weight:600; padding:7px 13px; border-radius:100px;
+    border:1px solid var(--border); color:var(--text-muted); background:var(--surface);
+  }
+
+  /* ---- Match widget (signature element) ---- */
+  .match-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:20px;
+    padding:26px; box-shadow:var(--shadow); position:relative; overflow:hidden;
+  }
+  .match-card::before{
+    content:""; position:absolute; inset:-40% -40% auto auto; width:280px; height:280px;
+    background:radial-gradient(circle, var(--primary-dim), transparent 70%); pointer-events:none;
+  }
+  .match-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;}
+  .match-head .tag{
+    font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600; color:var(--accent);
+    background:var(--accent-dim); padding:5px 10px; border-radius:100px; letter-spacing:.04em;
+  }
+  .match-title{font-size:13px; color:var(--text-muted); font-weight:500;}
+
+  .gauge-row{display:flex; align-items:center; gap:22px; margin-bottom:22px;}
+  .gauge{width:112px; height:112px; flex-shrink:0;}
+  .gauge svg{transform:rotate(-90deg);}
+  .gauge-track{fill:none; stroke:var(--surface-2); stroke-width:10;}
+  .gauge-fill{fill:none; stroke:var(--accent); stroke-width:10; stroke-linecap:round; transition:stroke-dashoffset .6s cubic-bezier(.4,0,.2,1), stroke .4s;}
+  .gauge-num{font-family:'JetBrains Mono',monospace; font-weight:600; font-size:15px;}
+  .gauge-label{font-size:12.5px; color:var(--text-muted); margin-top:2px;}
+
+  .match-controls label{font-size:12px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:8px; text-transform:uppercase; letter-spacing:.05em;}
+  .field-block{margin-bottom:16px;}
+  .seg{display:flex; gap:6px; flex-wrap:wrap;}
+  .seg button{
+    font-size:12.5px; font-weight:600; padding:7px 12px; border-radius:8px;
+    border:1px solid var(--border); background:var(--surface-2); color:var(--text-muted); cursor:pointer;
+    transition:.15s;
+  }
+  .seg button.active{background:var(--primary); border-color:var(--primary); color:#fff;}
+  input[type=range]{
+    width:100%; accent-color:var(--primary); height:4px; cursor:pointer;
+  }
+  .range-val{font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:600; color:var(--primary);}
+
+  .match-list{margin-top:20px; border-top:1px solid var(--border); padding-top:16px; display:flex; flex-direction:column; gap:10px;}
+  .match-row{display:flex; align-items:center; justify-content:space-between; font-size:13.5px;}
+  .match-row .b-name{font-weight:600;}
+  .match-row .b-sector{color:var(--text-muted); font-size:12px;}
+  .score-pill{font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; padding:4px 9px; border-radius:100px;}
+
+  /* ---------- LOGO / TRUSTED STRIP ---------- */
+  .strip{padding:34px 0; border-top:1px solid var(--border); border-bottom:1px solid var(--border);}
+  .strip-inner{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:18px;}
+  .strip-label{font-size:12.5px; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:.08em; white-space:nowrap;}
+  .strip-items{display:flex; gap:28px; flex-wrap:wrap;}
+  .strip-items span{font-size:14.5px; font-weight:600; color:var(--text-muted); opacity:.85;}
+
+  /* ---------- generic section header ---------- */
+  .section-head{max-width:640px; margin-bottom:48px;}
+  .section-head h2{font-size:clamp(26px,3vw,38px); line-height:1.15;}
+  .section-head p{margin-top:14px; color:var(--text-muted); font-size:16px; line-height:1.6;}
+  .section-pad{padding:88px 0;}
+
+  /* ---------- PROBLEM ---------- */
+  .problem-grid{display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:start;}
+  @media (max-width:860px){.problem-grid{grid-template-columns:1fr;}}
+  .problem-list{display:flex; flex-direction:column; gap:0;}
+  .problem-item{
+    display:flex; gap:16px; padding:18px 0; border-bottom:1px solid var(--border);
+  }
+  .problem-item:first-child{padding-top:0;}
+  .problem-item .num{font-family:'JetBrains Mono',monospace; color:var(--text-muted); font-size:13px; padding-top:3px;}
+  .problem-item h4{font-size:16px; font-weight:700; margin-bottom:4px;}
+  .problem-item p{font-size:14.5px; color:var(--text-muted); line-height:1.55;}
+
+  .quote-card{
+    background:var(--secondary); border-radius:20px; padding:36px; color:#fff; align-self:stretch;
+    display:flex; flex-direction:column; justify-content:space-between; min-height:100%;
+  }
+  html[data-theme="dark"] .quote-card{background:var(--surface-2); border:1px solid var(--border);}
+  .quote-card .big-stat{font-family:'JetBrains Mono',monospace; font-size:52px; font-weight:600; color:var(--accent); line-height:1;}
+  .quote-card .stat-label{margin-top:10px; font-size:14.5px; color:#CBD5E1; line-height:1.55;}
+
+  /* ---------- SOLUTION / FEATURES ---------- */
+  .feature-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:22px;}
+  @media (max-width:860px){.feature-grid{grid-template-columns:1fr 1fr;}}
+  @media (max-width:600px){.feature-grid{grid-template-columns:1fr;}}
+  .feature-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:26px;
+    transition:transform .25s ease, box-shadow .25s ease, border-color .25s;
+  }
+  .feature-card:hover{transform:translateY(-4px); box-shadow:var(--shadow); border-color:var(--primary);}
+  .f-icon{
+    width:42px; height:42px; border-radius:10px; background:var(--primary-dim); color:var(--primary);
+    display:flex; align-items:center; justify-content:center; margin-bottom:16px; font-size:19px;
+  }
+  .feature-card h3{font-size:16.5px; margin-bottom:8px;}
+  .feature-card p{font-size:14px; color:var(--text-muted); line-height:1.6;}
+
+  /* ---------- HOW IT WORKS ---------- */
+  .steps{display:grid; grid-template-columns:repeat(4,1fr); gap:0; position:relative;}
+  @media (max-width:900px){.steps{grid-template-columns:1fr; gap:28px;}}
+  .step{position:relative; padding-right:24px;}
+  .step-num{font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--primary); font-weight:600; margin-bottom:14px; display:block;}
+  .step h4{font-size:16.5px; margin-bottom:8px;}
+  .step p{font-size:13.5px; color:var(--text-muted); line-height:1.55;}
+  .step-line{
+    position:absolute; top:9px; left:calc(100% - 10px); width:calc(100% - 20px); height:1px;
+    background:linear-gradient(90deg, var(--border), var(--border) 60%, transparent 60%, transparent 100%);
+    background-size:12px 1px;
+  }
+  @media (max-width:900px){.step-line{display:none;}}
+
+  /* ---------- AUDIENCE TABS ---------- */
+  .tabbar{display:flex; gap:8px; margin-bottom:34px; flex-wrap:wrap;}
+  .tabbtn{
+    font-size:14px; font-weight:600; padding:10px 18px; border-radius:10px; border:1px solid var(--border);
+    background:var(--surface); color:var(--text-muted); cursor:pointer; transition:.15s;
+  }
+  .tabbtn.active{background:var(--secondary); color:#fff; border-color:var(--secondary);}
+  html[data-theme="dark"] .tabbtn.active{background:var(--primary); border-color:var(--primary);}
+  .tabpanel{display:none;}
+  .tabpanel.active{display:grid; grid-template-columns:1fr 1fr; gap:34px; align-items:center;}
+  @media (max-width:820px){.tabpanel.active{grid-template-columns:1fr;}}
+  .tabpanel ul{display:flex; flex-direction:column; gap:14px;}
+  .tabpanel li{display:flex; gap:12px; align-items:flex-start; font-size:15px; color:var(--text);}
+  .tabpanel li .dot{width:8px; height:8px; border-radius:50%; background:var(--accent); margin-top:7px; flex-shrink:0;}
+  .tab-visual{
+    background:var(--surface-2); border:1px solid var(--border); border-radius:18px; padding:30px;
+    min-height:220px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px;
+  }
+  .tab-visual .big{font-family:'JetBrains Mono',monospace; font-size:44px; font-weight:600; color:var(--primary);}
+  .tab-visual .cap{font-size:13.5px; color:var(--text-muted); text-align:center;}
+
+  /* ---------- COMPARISON ---------- */
+  .compare{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  @media (max-width:760px){.compare{grid-template-columns:1fr;}}
+  .compare-col{border-radius:18px; padding:30px; border:1px solid var(--border);}
+  .compare-col.bad{background:var(--surface);}
+  .compare-col.good{background:var(--secondary); color:#fff; border-color:var(--secondary);}
+  html[data-theme="dark"] .compare-col.good{background:var(--primary-dim); border-color:var(--primary);}
+  .compare-col h4{font-size:15px; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin-bottom:20px; color:inherit;}
+  .compare-col.bad h4{color:var(--text-muted);}
+  .compare-col ul li{display:flex; gap:10px; align-items:flex-start; font-size:14.5px; padding:9px 0; border-bottom:1px solid var(--border);}
+  .compare-col.good ul li{border-bottom:1px solid rgba(255,255,255,.12);}
+  .compare-col ul li:last-child{border-bottom:none;}
+  .mark{font-family:'JetBrains Mono',monospace; font-weight:700; flex-shrink:0;}
+  .compare-col.bad .mark{color:#DC2626;}
+  .compare-col.good .mark{color:var(--accent);}
+
+  /* ---------- HIGHLIGHT CHIPS ---------- */
+  .highlight-cloud{display:flex; flex-wrap:wrap; gap:12px;}
+  .hchip{
+    padding:12px 20px; border-radius:100px; border:1px solid var(--border); background:var(--surface);
+    font-size:14px; font-weight:600; display:flex; align-items:center; gap:8px;
+  }
+  .hchip .dot2{width:6px; height:6px; border-radius:50%; background:var(--primary);}
+
+  /* ---------- FAQ ---------- */
+  .faq-item{border-bottom:1px solid var(--border);}
+  .faq-q{
+    display:flex; justify-content:space-between; align-items:center; padding:22px 0;
+    cursor:pointer; font-size:16px; font-weight:700;
+  }
+  .faq-q .plus{font-family:'JetBrains Mono',monospace; font-size:20px; color:var(--primary); transition:transform .25s;}
+  .faq-item.open .plus{transform:rotate(45deg);}
+  .faq-a{max-height:0; overflow:hidden; transition:max-height .35s ease;}
+  .faq-a p{padding-bottom:22px; color:var(--text-muted); font-size:14.5px; line-height:1.6; max-width:640px;}
+
+  /* ---------- FINAL CTA ---------- */
+  .final-cta{
+    background:var(--secondary); border-radius:24px; padding:64px 40px; text-align:center; position:relative; overflow:hidden;
+  }
+  html[data-theme="dark"] .final-cta{background:var(--surface-2); border:1px solid var(--border);}
+  .final-cta::before{
+    content:""; position:absolute; width:420px; height:420px; border-radius:50%;
+    background:radial-gradient(circle, #2563EB33, transparent 70%); top:-160px; left:-100px;
+  }
+  .final-cta h2{color:#fff; font-size:clamp(26px,3.4vw,38px); position:relative;}
+  .final-cta p{color:#CBD5E1; margin-top:14px; font-size:16px; position:relative;}
+  .final-cta .hero-actions{justify-content:center; position:relative;}
+
+  /* ---------- FOOTER ---------- */
+  footer{padding:64px 0 32px; border-top:1px solid var(--border); margin-top:40px;}
+  .footer-grid{display:grid; grid-template-columns:1.4fr repeat(4,1fr); gap:32px;}
+  @media (max-width:820px){.footer-grid{grid-template-columns:1fr 1fr;}}
+  .footer-grid h5{font-size:12.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); margin-bottom:14px;}
+  .footer-grid ul{display:flex; flex-direction:column; gap:10px;}
+  .footer-grid a{font-size:14px; color:var(--text-muted);}
+  .footer-grid a:hover{color:var(--primary);}
+  .footer-bottom{display:flex; justify-content:space-between; align-items:center; margin-top:52px; padding-top:24px; border-top:1px solid var(--border); flex-wrap:wrap; gap:14px;}
+  .footer-bottom span{font-size:13px; color:var(--text-muted);}
+  .social{display:flex; gap:14px;}
+  .social a{width:34px; height:34px; border-radius:8px; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:13px; color:var(--text-muted);}
+  .social a:hover{color:var(--primary); border-color:var(--primary);}
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <div class="logo">
+      <svg class="logo-mark" viewBox="0 0 30 30" fill="none">
+        <circle cx="15" cy="15" r="13" stroke="#2563EB" stroke-width="2"/>
+        <circle cx="15" cy="15" r="3.2" fill="#10B981"/>
+        <circle cx="24" cy="10" r="2.4" fill="#2563EB"/>
+      </svg>
+      FranchiseHub
+    </div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#audience">Solutions</a>
+      <a href="#compare">Why FranchiseHub</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="nav-cta">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">◐</button>
+      <a href="auth.html" class="btn btn-primary btn-sm">Get started</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="reveal in">
+        <div class="eyebrow">AI-Powered Franchise Growth</div>
+        <h1>Discover, connect, and grow with the <span class="hl">future of franchising</span></h1>
+        <p class="lead">FranchiseHub matches ambitious investors with trusted franchise brands through AI-powered scoring, verified profiles, and territory intelligence — replacing spammy directories and expensive brokers.</p>
+        <div class="hero-actions">
+          <a href="auth.html" class="btn btn-primary">Get started</a>
+          <a href="#" class="btn-link">Explore brands →</a>
+        </div>
+        <div class="industries">
+          <span class="chip">Restaurants</span>
+          <span class="chip">Retail</span>
+          <span class="chip">Education</span>
+          <span class="chip">Healthcare</span>
+          <span class="chip">Fitness</span>
+          <span class="chip">Home Services</span>
+          <span class="chip">Technology</span>
+        </div>
+      </div>
+
+      <!-- Interactive AI Match widget -->
+      <div class="match-card reveal in">
+        <div class="match-head">
+          <div>
+            <div class="match-title">Live match preview</div>
+          </div>
+          <div class="tag">● AI MATCHING</div>
+        </div>
+
+        <div class="gauge-row">
+          <div class="gauge">
+            <svg viewBox="0 0 112 112" width="112" height="112">
+              <circle class="gauge-track" cx="56" cy="56" r="48"/>
+              <circle class="gauge-fill" id="gaugeFill" cx="56" cy="56" r="48" stroke-dasharray="301.6" stroke-dashoffset="301.6"/>
+            </svg>
+          </div>
+          <div>
+            <div class="gauge-num mono"><span id="gaugeNum">0</span>% match</div>
+            <div class="gauge-label">Best-fit score, recalculated live</div>
+          </div>
+        </div>
+
+        <div class="match-controls">
+          <div class="field-block">
+            <label>Investable capital</label>
+            <input type="range" id="capitalRange" min="5" max="100" value="35">
+            <div style="display:flex; justify-content:space-between; margin-top:6px;">
+              <span class="range-val mono" id="capitalVal">₹35L</span>
+              <span style="font-size:11.5px; color:var(--text-muted);">₹5L – ₹1Cr+</span>
+            </div>
+          </div>
+          <div class="field-block">
+            <label>Involvement style</label>
+            <div class="seg" id="styleSeg">
+              <button data-val="semi" class="active">Semi-absentee</button>
+              <button data-val="hands">Hands-on</button>
+              <button data-val="exec">Executive model</button>
+            </div>
+          </div>
+          <div class="field-block" style="margin-bottom:4px;">
+            <label>Sector preference</label>
+            <div class="seg" id="sectorSeg">
+              <button data-val="food" class="active">Food & Bev</button>
+              <button data-val="fitness">Fitness</button>
+              <button data-val="services">Home Services</button>
+              <button data-val="retail">Retail</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="match-list" id="matchList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUSTED / BUILT FOR -->
+  <section class="strip">
+    <div class="wrap strip-inner">
+      <span class="strip-label">Built for</span>
+      <div class="strip-items">
+        <span>Restaurants</span><span>Retail</span><span>Education</span>
+        <span>Healthcare</span><span>Fitness</span><span>Home Services</span><span>Technology</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEM -->
+  <section class="section-pad" id="problem">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow">The Problem</div>
+        <h2>Why franchise expansion is broken</h2>
+        <p>Most franchise growth still depends on outdated directories, expensive brokers, and unqualified leads — slowing brands down and wasting investors' time.</p>
+      </div>
+      <div class="problem-grid">
+        <div class="problem-list reveal">
+          <div class="problem-item">
+            <span class="num mono">01</span>
+            <div><h4>Low-quality investor inquiries</h4><p>Directory sites yield window shoppers without the capital to actually buy in.</p></div>
+          </div>
+          <div class="problem-item">
+            <span class="num mono">02</span>
+            <div><h4>High broker commissions</h4><p>Brokers hoard strong candidates and take a heavy cut of every deal.</p></div>
+          </div>
+          <div class="problem-item">
+            <span class="num mono">03</span>
+            <div><h4>Slow, manual expansion</h4><p>Screening and matching happen by hand, one email thread at a time.</p></div>
+          </div>
+          <div class="problem-item">
+            <span class="num mono">04</span>
+            <div><h4>Poor territory planning</h4><p>Brands rarely know which zip codes are actually in demand.</p></div>
+          </div>
+          <div class="problem-item">
+            <span class="num mono">05</span>
+            <div><h4>Time-consuming screening</h4><p>Every unqualified lead still costs a real conversation to rule out.</p></div>
+          </div>
+        </div>
+        <div class="quote-card reveal">
+          <div>
+            <div class="big-stat mono">10x</div>
+            <div class="stat-label">more expensive to source a qualified franchisee through a traditional broker than through a verified, data-driven match.</div>
+          </div>
+          <div class="stat-label" style="margin-top:28px; border-top:1px solid rgba(255,255,255,.15); padding-top:20px;">One platform. Verified identity, real intent, and a score you can trust — replacing 2000s-era directories and broker success fees.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOLUTION / FEATURES -->
+  <section class="section-pad" id="features" style="background:var(--surface-2);">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow">Our Solution</div>
+        <h2>One platform. Endless franchise opportunities.</h2>
+        <p>Orbit combines AI, data, and automation to simplify franchise discovery and expansion — for investors and brands alike.</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card reveal"><div class="f-icon">◎</div><h3>AI franchise matching</h3><p>Personalized recommendations based on your budget, interests, location, and business goals.</p></div>
+        <div class="feature-card reveal"><div class="f-icon">✓</div><h3>Verified investor profiles</h3><p>Brands connect only with verified and financially qualified investors.</p></div>
+        <div class="feature-card reveal"><div class="f-icon">⌖</div><h3>Smart territory discovery</h3><p>Find the best locations using market intelligence and expansion insights.</p></div>
+        <div class="feature-card reveal"><div class="f-icon">▤</div><h3>Brand management</h3><p>Manage listings, applications, leads, and expansion plans from one dashboard.</p></div>
+        <div class="feature-card reveal"><div class="f-icon">✉</div><h3>Secure messaging</h3><p>Communicate directly without exposing personal contact details until both sides consent.</p></div>
+        <div class="feature-card reveal"><div class="f-icon">▲</div><h3>Analytics dashboard</h3><p>Track investor interest, engagement, and growth performance in real time.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section-pad" id="how">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow">How It Works</div>
+        <h2>From profile to partnership in four steps</h2>
+      </div>
+      <div class="steps">
+        <div class="step reveal"><span class="step-num mono">STEP 01</span><h4>Create your profile</h4><p>Sign up as an investor or a franchise brand in minutes.</p><div class="step-line"></div></div>
+        <div class="step reveal"><span class="step-num mono">STEP 02</span><h4>Complete verification</h4><p>Verify your identity, financials, or business details.</p><div class="step-line"></div></div>
+        <div class="step reveal"><span class="step-num mono">STEP 03</span><h4>AI finds your matches</h4><p>Our engine scores and ranks the best-fit brands or investors.</p><div class="step-line"></div></div>
+        <div class="step reveal"><span class="step-num mono">STEP 04</span><h4>Connect and grow</h4><p>Message securely, schedule meetings, and close the deal.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUDIENCE TABS -->
+  <section class="section-pad" id="audience" style="background:var(--surface-2);">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow">Who It's For</div>
+        <h2>Built for every side of the franchise deal</h2>
+      </div>
+      <div class="tabbar reveal">
+        <button class="tabbtn active" data-tab="investors">Investors</button>
+        <button class="tabbtn" data-tab="brands">Franchise Brands</button>
+        <button class="tabbtn" data-tab="partners">Service Partners</button>
+      </div>
+
+      <div class="tabpanel active" id="tab-investors">
+        <ul>
+          <li><span class="dot"></span>Find trusted, verified franchise brands</li>
+          <li><span class="dot"></span>Compare investment options side by side</li>
+          <li><span class="dot"></span>Discover high-growth, well-performing brands</li>
+          <li><span class="dot"></span>Receive AI recommendations tailored to your budget</li>
+        </ul>
+        <div class="tab-visual"><div class="big mono">92%</div><div class="cap">average match score for investors who complete full verification</div></div>
+      </div>
+      <div class="tabpanel" id="tab-brands">
+        <ul>
+          <li><span class="dot"></span>Reach qualified, capital-verified investors</li>
+          <li><span class="dot"></span>Manage leads from one built-in CRM</li>
+          <li><span class="dot"></span>Expand into new territories with confidence</li>
+          <li><span class="dot"></span>Reduce cost per qualified acquisition</li>
+        </ul>
+        <div class="tab-visual"><div class="big mono">↓63%</div><div class="cap">lower cost per qualified lead vs. traditional broker fees</div></div>
+      </div>
+      <div class="tabpanel" id="tab-partners">
+        <ul>
+          <li><span class="dot"></span>Lawyers, financial advisors, and consultants</li>
+          <li><span class="dot"></span>Marketing agencies serving growing brands</li>
+          <li><span class="dot"></span>Real estate partners sourcing territory deals</li>
+          <li><span class="dot"></span>Plug into deal flow as it happens, not after</li>
+        </ul>
+        <div class="tab-visual"><div class="big mono">1</div><div class="cap">ecosystem connecting every party in a franchise deal</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARISON -->
+  <section class="section-pad" id="compare">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow">Why Choose FranchiseHub</div>
+        <h2>Not another static directory</h2>
+      </div>
+      <div class="compare">
+        <div class="compare-col bad reveal">
+          <h4>Traditional Directories</h4>
+          <ul>
+            <li><span class="mark">✕</span>Static listings</li>
+            <li><span class="mark">✕</span>No AI matching</li>
+            <li><span class="mark">✕</span>Low-quality leads</li>
+            <li><span class="mark">✕</span>No identity verification</li>
+            <li><span class="mark">✕</span>Manual follow-up</li>
+            <li><span class="mark">✕</span>No analytics</li>
+          </ul>
+        </div>
+        <div class="compare-col good reveal">
+          <h4>FranchiseHub</h4>
+          <ul>
+            <li><span class="mark">✓</span>AI-powered recommendations</li>
+            <li><span class="mark">✓</span>Verified investor network</li>
+            <li><span class="mark">✓</span>Smart territory analysis</li>
+            <li><span class="mark">✓</span>Qualified lead generation</li>
+            <li><span class="mark">✓</span>Modern, secure communication</li>
+            <li><span class="mark">✓</span>Real-time growth analytics</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLATFORM HIGHLIGHTS -->
+  <section class="section-pad" style="background:var(--surface-2);">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow">Platform Highlights</div>
+        <h2>Everything a growing franchise ecosystem needs</h2>
+      </div>
+      <div class="highlight-cloud reveal">
+        <span class="hchip"><span class="dot2"></span>AI Matching</span>
+        <span class="hchip"><span class="dot2"></span>Verified Investors</span>
+        <span class="hchip"><span class="dot2"></span>Territory Intelligence</span>
+        <span class="hchip"><span class="dot2"></span>Lead Management</span>
+        <span class="hchip"><span class="dot2"></span>Growth Analytics</span>
+        <span class="hchip"><span class="dot2"></span>Secure Messaging</span>
+        <span class="hchip"><span class="dot2"></span>Document Sharing</span>
+        <span class="hchip"><span class="dot2"></span>Investment Insights</span>
+        <span class="hchip"><span class="dot2"></span>Expansion Dashboard</span>
+        <span class="hchip"><span class="dot2"></span>Marketplace</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section-pad" id="faq">
+    <div class="wrap" style="max-width:760px; margin:0 auto;">
+      <div class="section-head reveal" style="max-width:100%;">
+        <div class="eyebrow">FAQ</div>
+        <h2>Common questions</h2>
+      </div>
+      <div class="faq-list reveal">
+        <div class="faq-item">
+          <div class="faq-q">Is the platform free? <span class="plus">+</span></div>
+          <div class="faq-a"><p>Basic access is free. Premium tools are available through subscription plans.</p></div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Who can join? <span class="plus">+</span></div>
+          <div class="faq-a"><p>Investors, franchise brands, consultants, and service providers can all create a profile.</p></div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">How does AI matching work? <span class="plus">+</span></div>
+          <div class="faq-a"><p>Our engine analyzes investment preferences, budgets, locations, industries, and business goals to recommend the most suitable opportunities.</p></div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Are profiles verified? <span class="plus">+</span></div>
+          <div class="faq-a"><p>Yes — verification helps improve trust and connection quality across the platform.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="section-pad">
+    <div class="wrap">
+      <div class="final-cta reveal">
+        <h2>Ready to build the next franchise success story?</h2>
+        <p>Join a growing network of investors and franchise brands using technology to make smarter business decisions.</p>
+        <div class="hero-actions">
+          <a href="auth.html" class="btn btn-primary">Get started</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="logo" style="margin-bottom:14px;">
+          <svg class="logo-mark" viewBox="0 0 30 30" fill="none">
+            <circle cx="15" cy="15" r="13" stroke="#2563EB" stroke-width="2"/>
+            <circle cx="15" cy="15" r="3.2" fill="#10B981"/>
+            <circle cx="24" cy="10" r="2.4" fill="#2563EB"/>
+          </svg>
+          FranchiseHub
+        </div>
+        <p style="color:var(--text-muted); font-size:14px; max-width:240px; line-height:1.6;">Discover, connect, and grow with the future of franchising.</p>
+      </div>
+      <div><h5>Company</h5><ul><a href="#">About</a><a href="#">Careers</a><a href="#">Blog</a><a href="#">Contact</a></ul></div>
+      <div><h5>Product</h5><ul><a href="#">Features</a><a href="#">Pricing</a><a href="#">Solutions</a><a href="#">How it works</a></ul></div>
+      <div><h5>Legal</h5><ul><a href="#">Privacy policy</a><a href="#">Terms of service</a></ul></div>
+      <div><h5>Connect</h5><ul><a href="#">Email us</a></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 FranchiseHub. All rights reserved.</span>
+      <div class="social">
+        <a href="#" aria-label="LinkedIn">in</a>
+        <a href="#" aria-label="X">X</a>
+        <a href="#" aria-label="Instagram">◎</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Theme toggle
+  const root = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+  toggle.addEventListener('click', () => {
+    const cur = root.getAttribute('data-theme');
+    root.setAttribute('data-theme', cur === 'light' ? 'dark' : 'light');
+    toggle.textContent = cur === 'light' ? '◑' : '◐';
+  });
+
+  // Scroll reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Audience tabs
+  document.querySelectorAll('.tabbtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tabbtn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tabpanel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const q = item.querySelector('.faq-q');
+    const a = item.querySelector('.faq-a');
+    q.addEventListener('click', () => {
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => { i.classList.remove('open'); i.querySelector('.faq-a').style.maxHeight = null; });
+      if(!isOpen){ item.classList.add('open'); a.style.maxHeight = a.scrollHeight + 'px'; }
+    });
+  });
+
+  // ---- AI Match widget logic ----
+  const brands = {
+    food:    [{name:'Urban Brew Café', tier:'₹18L–₹45L'}, {name:'Spice Route Kitchens', tier:'₹30L–₹80L'}, {name:'Golden Crust Bakery', tier:'₹12L–₹28L'}],
+    fitness: [{name:'FlexFit Studios', tier:'₹22L–₹50L'}, {name:'PowerHouse Gyms', tier:'₹40L–₹95L'}, {name:'CoreZone Wellness', tier:'₹15L–₹35L'}],
+    services:[{name:'HomeCare Pro', tier:'₹8L–₹20L'}, {name:'CleanNest Services', tier:'₹6L–₹15L'}, {name:'FixIt Home Solutions', tier:'₹10L–₹25L'}],
+    retail:  [{name:'TrendMart Retail', tier:'₹25L–₹60L'}, {name:'StyleHub Fashion', tier:'₹18L–₹42L'}, {name:'GadgetZone Stores', tier:'₹35L–₹75L'}]
+  };
+
+  const capitalRange = document.getElementById('capitalRange');
+  const capitalVal = document.getElementById('capitalVal');
+  const styleSeg = document.getElementById('styleSeg');
+  const sectorSeg = document.getElementById('sectorSeg');
+  const gaugeFill = document.getElementById('gaugeFill');
+  const gaugeNum = document.getElementById('gaugeNum');
+  const matchList = document.getElementById('matchList');
+  const CIRC = 301.6;
+
+  let state = { capital: 35, style: 'semi', sector: 'food' };
+
+  function seededScore(seed){
+    // simple deterministic pseudo-random based on state, for stable-feeling "AI" output
+    let x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  }
+
+  function computeScore(){
+    const base = 55 + Math.round(seededScore(state.capital * 3.1 + state.sector.length * 7) * 20);
+    const styleBonus = state.style === 'semi' ? 8 : state.style === 'exec' ? 5 : 2;
+    let score = Math.min(97, base + styleBonus + Math.round(state.capital / 12));
+    return score;
+  }
+
+  function scoreColor(score){
+    if(score >= 80) return getComputedStyle(root).getPropertyValue('--accent').trim();
+    if(score >= 60) return getComputedStyle(root).getPropertyValue('--primary').trim();
+    return '#F59E0B';
+  }
+
+  function render(){
+    capitalVal.textContent = '₹' + state.capital + 'L';
+    const score = computeScore();
+    const offset = CIRC - (CIRC * score / 100);
+    gaugeFill.style.strokeDashoffset = offset;
+    gaugeFill.style.stroke = scoreColor(score);
+    gaugeNum.textContent = score;
+
+    const list = brands[state.sector];
+    matchList.innerHTML = list.map((b, i) => {
+      const s = Math.max(41, score - i * 9 - Math.round(seededScore(i + state.capital) * 5));
+      const c = scoreColor(s);
+      return `<div class="match-row">
+        <div><div class="b-name">${b.name}</div><div class="b-sector">${b.tier} · ${sectorLabel(state.sector)}</div></div>
+        <div class="score-pill" style="color:${c}; background:${c}22;">${s}%</div>
+      </div>`;
+    }).join('');
+  }
+
+  function sectorLabel(v){
+    return {food:'Food & Bev', fitness:'Fitness', services:'Home Services', retail:'Retail'}[v];
+  }
+
+  capitalRange.addEventListener('input', e => { state.capital = parseInt(e.target.value); render(); });
+  [...styleSeg.children].forEach(btn => btn.addEventListener('click', () => {
+    [...styleSeg.children].forEach(b => b.classList.remove('active'));
+    btn.classList.add('active'); state.style = btn.dataset.val; render();
+  }));
+  [...sectorSeg.children].forEach(btn => btn.addEventListener('click', () => {
+    [...sectorSeg.children].forEach(b => b.classList.remove('active'));
+    btn.classList.add('active'); state.sector = btn.dataset.val; render();
+  }));
+
+  render();
+  setTimeout(render, 150); // ensure gauge animates in on load
+</script>
+
+</body>
+</html>
