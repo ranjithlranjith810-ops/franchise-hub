@@ -23,6 +23,9 @@
     --border:#E2E8F0;
     --shadow: 0 1px 2px rgba(15,23,42,.04), 0 8px 24px -12px rgba(15,23,42,.10);
     --radius: 14px;
+    --hero-glow-1: rgba(37,99,235,.16);
+    --hero-glow-2: rgba(16,185,129,.14);
+    --hero-glow-3: rgba(59,130,246,.08);
   }
   html[data-theme="dark"]{
     --bg:#0B1220;
@@ -34,6 +37,9 @@
     --primary-dim:#2563EB26;
     --accent-dim:#10B98126;
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -16px rgba(0,0,0,.55);
+    --hero-glow-1: rgba(56,189,248,.12);
+    --hero-glow-2: rgba(16,185,129,.16);
+    --hero-glow-3: rgba(96,165,250,.10);
   }
 
   *{box-sizing:border-box; margin:0; padding:0;}
@@ -72,6 +78,7 @@
   nav{display:flex; align-items:center; justify-content:space-between; padding:16px 28px; max-width:1180px; margin:0 auto;}
   .logo{display:flex; align-items:center; gap:10px; font-family:'Manrope',sans-serif; font-weight:800; font-size:19px;}
   .logo-mark{width:30px; height:30px; position:relative; animation:logoFloat 7.5s ease-in-out infinite;}
+  .logo-img{width:44px; height:44px; object-fit:contain;}
   .nav-links{display:flex; gap:30px; align-items:center;}
   @keyframes logoFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);} }
   .nav-links a{font-size:14.5px; font-weight:500; color:var(--text-muted); transition:color .2s;}
@@ -105,9 +112,9 @@
     inset:0;
     pointer-events:none;
     background:
-      radial-gradient(circle at 18% 14%, rgba(37,99,235,.16), transparent 20%),
-      radial-gradient(circle at 82% 28%, rgba(16,185,129,.14), transparent 18%),
-      radial-gradient(circle at 50% 96%, rgba(59,130,246,.08), transparent 12%);
+      radial-gradient(circle at 18% 14%, var(--hero-glow-1), transparent 20%),
+      radial-gradient(circle at 82% 28%, var(--hero-glow-2), transparent 18%),
+      radial-gradient(circle at 50% 96%, var(--hero-glow-3), transparent 12%);
     opacity:.96;
     animation:drift 18s ease-in-out infinite;
   }
@@ -326,11 +333,7 @@
 <header>
   <nav>
     <div class="logo">
-      <svg class="logo-mark" viewBox="0 0 30 30" fill="none">
-        <circle cx="15" cy="15" r="13" stroke="#2563EB" stroke-width="2"/>
-        <circle cx="15" cy="15" r="3.2" fill="#10B981"/>
-        <circle cx="24" cy="10" r="2.4" fill="#2563EB"/>
-      </svg>
+      <img src="franchiselogo.png" alt="Franchise Hub" class="logo-mark logo-img" />
       FranchiseHub
     </div>
     <div class="nav-links">
@@ -660,12 +663,8 @@
   <div class="wrap">
     <div class="footer-grid">
       <div>
-        <div class="logo" style="margin-bottom:14px;">
-          <svg class="logo-mark" viewBox="0 0 30 30" fill="none">
-            <circle cx="15" cy="15" r="13" stroke="#2563EB" stroke-width="2"/>
-            <circle cx="15" cy="15" r="3.2" fill="#10B981"/>
-            <circle cx="24" cy="10" r="2.4" fill="#2563EB"/>
-          </svg>
+        <div class="logo" style="margin-bottom:14px; display:flex; align-items:center; gap:10px;">
+          <img src="franchiselogo.png" alt="Franchise Hub" class="logo-mark logo-img" />
           FranchiseHub
         </div>
         <p style="color:var(--text-muted); font-size:14px; max-width:240px; line-height:1.6;">Discover, connect, and grow with the future of franchising.</p>
@@ -690,10 +689,17 @@
   // Theme toggle
   const root = document.documentElement;
   const toggle = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('theme');
+  const initialTheme = savedTheme === 'dark' ? 'dark' : 'light';
+  root.setAttribute('data-theme', initialTheme);
+  toggle.textContent = initialTheme === 'dark' ? '◑' : '◐';
+
   toggle.addEventListener('click', () => {
     const cur = root.getAttribute('data-theme');
-    root.setAttribute('data-theme', cur === 'light' ? 'dark' : 'light');
-    toggle.textContent = cur === 'light' ? '◑' : '◐';
+    const nextTheme = cur === 'light' ? 'dark' : 'light';
+    root.setAttribute('data-theme', nextTheme);
+    localStorage.setItem('theme', nextTheme);
+    toggle.textContent = nextTheme === 'dark' ? '◑' : '◐';
   });
 
   // Scroll reveal

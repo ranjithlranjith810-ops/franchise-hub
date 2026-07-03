@@ -22,6 +22,17 @@
     --shadow: 0 1px 2px rgba(15,23,42,.04), 0 8px 24px -12px rgba(15,23,42,.10);
     --radius: 18px;
   }
+  html[data-theme="dark"]{
+    --bg:#0B1220;
+    --surface:#131C2E;
+    --surface-2:#182338;
+    --text:#EEF2F7;
+    --text-muted:#93A0B4;
+    --border:#243247;
+    --primary-dim:#2563EB26;
+    --accent-dim:#10B98126;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -16px rgba(0,0,0,.55);
+  }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{scroll-behavior:smooth;}
   body{
@@ -36,19 +47,22 @@
     content:'';
     position:fixed;
     inset:0;
-    background:radial-gradient(circle at 14% 18%, rgba(37,99,235,.15), transparent 15%),
-                radial-gradient(circle at 86% 22%, rgba(16,185,129,.12), transparent 12%),
-                radial-gradient(circle at 50% 95%, rgba(37,99,235,.08), transparent 10%);
+    background:
+      radial-gradient(circle at 14% 18%, rgba(37,99,235,.15), transparent 15%),
+      radial-gradient(circle at 86% 22%, rgba(16,185,129,.12), transparent 12%),
+      radial-gradient(circle at 50% 95%, rgba(37,99,235,.08), transparent 10%);
     pointer-events:none;
     z-index:-1;
+    transition:background .35s ease;
   }
   a{color:inherit; text-decoration:none;}
   img{max-width:100%; display:block;}
   .wrap{max-width:1040px; margin:0 auto; padding:0 24px;}
-  header{position:sticky; top:0; background:rgba(248,250,252,.97); backdrop-filter:blur(16px); z-index:10; border-bottom:1px solid var(--border);}
+  header{position:sticky; top:0; background:color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter:blur(16px); z-index:10; border-bottom:1px solid var(--border);}
   nav{display:flex; align-items:center; justify-content:space-between; padding:18px 0;}
-  .logo{display:flex; align-items:center; gap:10px; font-family:'Manrope',sans-serif; font-weight:800; font-size:18px;}
-  .logo-mark{width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:12px; background:rgba(37,99,235,.1); color:#2563EB; font-size:18px;}
+  .logo{display:flex; align-items:center; gap:10px; font-family:'Manrope',sans-serif; font-weight:800; font-size:18px; color:var(--text);}
+  .logo-mark{width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:12px; background:var(--primary-dim); color:var(--primary); font-size:18px;}
+  .logo-img{width:44px; height:44px; object-fit:contain;}
   .section-head{max-width:760px; margin:72px auto 36px; text-align:center;}
   .eyebrow{font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--primary); margin-bottom:12px;}
   h1{font-family:'Manrope',sans-serif; font-size:clamp(36px,4vw,56px); line-height:1.05; margin-bottom:18px;}
@@ -56,10 +70,13 @@
   p{color:var(--text-muted);}
   .tabs{display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-bottom:30px;}
   .tabbtn{border:none; background:var(--surface); color:var(--text-muted); font-size:14.5px; font-weight:700; padding:14px 22px; border-radius:14px; cursor:pointer; box-shadow:0 1px 2px rgba(15,23,42,.08); transition:.2s;}
+  .tabbtn:hover{background:var(--surface-2);}
+  .tabbtn:hover{background:var(--surface-2);}
   .tabbtn.active{background:var(--primary); color:#fff;}
   .panel{display:none;}
   .panel.active{display:block;}
   .form-card{background:var(--surface); border:1px solid var(--border); border-radius:28px; padding:34px; box-shadow:var(--shadow);}
+  .field input, .field select, .field textarea{background:var(--surface-2);}
   .form-grid{display:grid; gap:18px;}
   .field{display:flex; flex-direction:column; gap:10px;}
   .field label{font-size:13px; font-weight:700; color:var(--text);}
@@ -70,6 +87,13 @@
   .btn{font-family:'Inter',sans-serif; font-weight:700; border:none; border-radius:14px; padding:14px 24px; cursor:pointer; transition:transform .15s ease, box-shadow .2s ease, background .2s ease;}
   .btn-primary{background:var(--primary); color:#fff; box-shadow:0 10px 24px -12px rgba(37,99,235,.7);}
   .btn-primary:hover{transform:translateY(-1px);}
+  .theme-toggle{
+    width:42px; height:42px; border-radius:12px; border:1px solid var(--border);
+    background:var(--surface); color:var(--text); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-size:16px; transition:background .2s, border-color .2s, color .2s;
+  }
+  .theme-toggle:hover{background:var(--surface-2);}
+  .theme-toggle:hover{border-color:var(--primary);}
   .role-row{display:grid; grid-template-columns:repeat(3,minmax(140px,1fr)); gap:14px; margin-bottom:24px;}
   .role-option{border:1px solid var(--border); border-radius:18px; padding:18px; cursor:pointer; transition:border-color .2s, background .2s;}
   .role-option input{display:none;}
@@ -91,8 +115,11 @@
 <header>
   <div class="wrap">
     <nav>
-      <a href="landing-page.html" class="logo"><span class="logo-mark">FH</span>FranchiseHub</a>
-      <a href="landing-page.html" class="tabbtn">Back to home</a>
+      <a href="landing-page.html" class="logo"><img src="franchiselogo.png" alt="Franchise Hub" class="logo-mark logo-img" />FranchiseHub</a>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">◐</button>
+        <a href="landing-page.html" class="tabbtn">Back to home</a>
+      </div>
     </nav>
   </div>
 </header>
@@ -322,6 +349,20 @@
 
   roleOptions.forEach(option => {
     option.addEventListener('click', () => setRole(option.dataset.role));
+  });
+
+  const root = document.documentElement;
+  const themeToggle = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('theme');
+  const initialTheme = savedTheme === 'dark' ? 'dark' : 'light';
+  root.setAttribute('data-theme', initialTheme);
+  themeToggle.textContent = initialTheme === 'dark' ? '◑' : '◐';
+  themeToggle.addEventListener('click', () => {
+    const currentTheme = root.getAttribute('data-theme');
+    const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
+    root.setAttribute('data-theme', nextTheme);
+    localStorage.setItem('theme', nextTheme);
+    themeToggle.textContent = nextTheme === 'dark' ? '◑' : '◐';
   });
 
   setRole('franchisor');
