@@ -4,10 +4,754 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+// =====================================================================
+// ENUM TYPES
+// =====================================================================
+enum RoleType {
+  franchisor
+  broker
+  franchisee
+  admin
+}
+
+enum OrgType {
+  franchisor
+  brokerage
+  other
+}
+
+enum OrgMemberRole {
+  owner
+  admin
+  member
+}
+
+enum VerificationStatus {
+  unverified
+  pending
+  verified
+  rejected
+}
+
+enum CatalogStatus {
+  draft
+  active
+  paused
+  closed
+  archived
+}
+
+enum TerritoryRegion {
+  country
+  state
+  metro
+  city
+  postal_code
+  custom
+}
+
+enum LeadSource {
+  direct
+  broker_referral
+  platform_search
+  campaign
+  referral
+}
+
+enum LeadStatus {
+  new
+  contacted
+  qualified
+  disqualified
+  converted
+}
+
+enum DealStage {
+  inquiry
+  discovery
+  fdd_review
+  discovery_day
+  item_23_call
+  agreement_sent
+  signed
+  closed_won
+  closed_lost
+}
+
+enum DealClosedStatus {
+  open
+  won
+  lost
+}
+
+enum ConnectionStatus {
+  pending
+  accepted
+  declined
+  blocked
+}
+
+enum ConversationType {
+  direct
+  group
+}
+
+enum PostVisibility {
+  public
+  connections
+  private
+}
+
+enum ReviewStatus {
+  pending
+  published
+  flagged
+  removed
+}
+
+enum DocumentType {
+  fdd
+  franchise_agreement
+  financial_statement
+  marketing_kit
+  other
+}
+
+enum SubscriptionStatus {
+  trialing
+  active
+  past_due
+  canceled
+  expired
+}
+
+enum TimelineToPurchase {
+  immediate
+  within_3_months
+  within_6_months
+  within_12_months
+  exploring
+}
+
+// =====================================================================
+// 1. CORE IDENTITY
+// =====================================================================
+model user {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  emailVerified   Boolean   @default(false)
+  phone           String?
+  firstName       String
+  lastName        String
+  name            String?
+  avatarUrl       String?
+  image           String?
+  headline        String?
+  bio             String?
+  city            String?
+  stateProvince   String?
+  countryCode     String?   @db.Char(2)
+  timezone        String?
+  emailVerifiedAt DateTime?
+  phoneVerifiedAt DateTime?
+  isActive        Boolean   @default(true)
+  lastLoginAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  sessions                 Session[]
+  accounts                 Account[]
+  userRoles                UserRole[]
+  createdOrganizations     Organization[]
+  organizationMembers      OrganizationMember[]
+  postedListings           FranchiseListing[]
+  uploadedDocuments        Document[]
+  requesterConnections     Connection[]         @relation("requester")
+  addresseeConnections     Connection[]         @relation("addressee")
+  franchiseeProfile        FranchiseeProfile?
+  brokerProfile            BrokerProfile?
+  sentMessages             Message[]            @relation("sender")
+  receivedMessages         Message[]            @relation("recipient")
+  leadsAsFranchisee        Lead[]               @relation("lead_franchisee")
+  leadsAsBroker            Lead[]               @relation("lead_broker")
+  dealsAsFranchisee        Deal[]               @relation("franchisee")
+  dealsAsBroker            Deal[]               @relation("broker")
+  dealsAsFranchisorContact Deal[]               @relation("franchisor_contact")
+  changedDealStages        DealStageHistory[]
+  createdPosts             Post[]
+  createdComments          Comment[]
+  createdReviews           Review[]
+  savedListings            SavedListing[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String
+  role      RoleType
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relations
+  user user @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, role])
+  @@index([userId])
+  @@map("user_roles")
+}
+
+// =====================================================================
+// 2. AUTH — BETTER AUTH
+// =====================================================================
+model Session {
+  id             String   @id
+  expiresAt      DateTime
+  token          String   @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  ipAddress      String?
+  userAgent      String?
+  userId         String
+  impersonatedBy String?
+
+  user user @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user user @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
+
+// =====================================================================
+// 3. ORGANIZATIONS
+// =====================================================================
+model Industry {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  parentId  String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  parent              Industry?                    @relation("parent", fields: [parentId], references: [id], onDelete: SetNull)
+  children            Industry[]                   @relation("parent")
+  organizations       Organization[]
+  franchiseBrands     FranchiseBrand[]
+  franchiseeInterests FranchiseeIndustryInterest[]
+
+  @@index([parentId])
+  @@map("industries")
+}
+
+model Address {
+  id            String   @id @default(cuid())
+  line1         String?
+  line2         String?
+  city          String?
+  stateProvince String?
+  postalCode    String?
+  countryCode   String   @db.Char(2)
+  latitude      Decimal? @db.Decimal(9, 6)
+  longitude     Decimal? @db.Decimal(9, 6)
+
+  // Relations
+  organizations Organization[]
+
+  @@map("addresses")
+}
+
+model Organization {
+  id            String             @id @default(cuid())
+  name          String
+  orgType       OrgType
+  slug          String             @unique
+  website       String?
+  logoUrl       String?
+  description   String?
+  foundedYear   Int?
+  industryId    String?
+  addressId     String?
+  employeeCount String?
+  verification  VerificationStatus @default(unverified)
+  createdById   String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  // Relations
+  createdBy             user?                  @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  industry              Industry?              @relation(fields: [industryId], references: [id], onDelete: SetNull)
+  address               Address?               @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  members               OrganizationMember[]
+  franchiseBrands       FranchiseBrand[]
+  brokerProfiles        BrokerProfile[]
+  brokerRepresentations BrokerRepresentation[] @relation("franchisor_org")
+  documents             Document[]
+
+  @@index([orgType])
+  @@index([industryId])
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id               String        @id @default(cuid())
+  organizationId   String
+  userId           String
+  title            String?
+  memberRole       OrgMemberRole @default(member)
+  isPrimaryContact Boolean       @default(false)
+  joinedAt         DateTime      @default(now())
+
+  // Relations
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         user         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@map("organization_members")
+}
+
+// =====================================================================
+// 3. FRANCHISE CATALOG
+// =====================================================================
+model FranchiseBrand {
+  id                       String        @id @default(cuid())
+  organizationId           String
+  name                     String
+  slug                     String        @unique
+  logoUrl                  String?
+  coverImageUrl            String?
+  industryId               String?
+  foundedYear              Int?
+  franchisingsSinceYear    Int?
+  totalUnits               Int?
+  description              String?
+  website                  String?
+  minInvestment            Decimal?      @db.Decimal(14, 2)
+  maxInvestment            Decimal?      @db.Decimal(14, 2)
+  franchiseFee             Decimal?      @db.Decimal(14, 2)
+  royaltyFeePct            Decimal?      @db.Decimal(5, 2)
+  marketingFeePct          Decimal?      @db.Decimal(5, 2)
+  netWorthRequirement      Decimal?      @db.Decimal(14, 2)
+  liquidCapitalRequirement Decimal?      @db.Decimal(14, 2)
+  veteranDiscount          Boolean       @default(false)
+  status                   CatalogStatus @default(draft)
+  createdAt                DateTime      @default(now())
+  updatedAt                DateTime      @updatedAt
+
+  // Relations
+  organization Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  industry     Industry?              @relation(fields: [industryId], references: [id], onDelete: SetNull)
+  territories  Territory[]
+  listings     FranchiseListing[]
+  documents    Document[]
+  brokerReps   BrokerRepresentation[]
+
+  @@index([organizationId])
+  @@index([industryId])
+  @@index([status])
+  @@index([minInvestment, maxInvestment])
+  @@map("franchise_brands")
+}
+
+model Territory {
+  id               String          @id @default(cuid())
+  franchiseBrandId String?
+  name             String
+  regionType       TerritoryRegion
+  countryCode      String?         @db.Char(2)
+  stateProvince    String?
+  city             String?
+  postalCode       String?
+  isAvailable      Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  // Relations
+  franchiseBrand FranchiseBrand?    @relation(fields: [franchiseBrandId], references: [id], onDelete: Cascade)
+  listings       FranchiseListing[]
+
+  @@index([franchiseBrandId])
+  @@index([countryCode, stateProvince, city])
+  @@map("territories")
+}
+
+model FranchiseListing {
+  id               String        @id @default(cuid())
+  franchiseBrandId String
+  territoryId      String?
+  title            String
+  description      String?
+  investmentMin    Decimal?      @db.Decimal(14, 2)
+  investmentMax    Decimal?      @db.Decimal(14, 2)
+  status           CatalogStatus @default(draft)
+  postedById       String
+  listedAt         DateTime?
+  expiresAt        DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  // Relations
+  franchiseBrand FranchiseBrand @relation(fields: [franchiseBrandId], references: [id], onDelete: Cascade)
+  territory      Territory?     @relation(fields: [territoryId], references: [id], onDelete: SetNull)
+  postedBy       user           @relation(fields: [postedById], references: [id], onDelete: Restrict)
+  leads          Lead[]
+  deals          Deal[]
+  savedBy        SavedListing[]
+
+  @@index([franchiseBrandId])
+  @@index([territoryId])
+  @@index([status, listedAt])
+  @@map("franchise_listings")
+}
+
+model SavedListing {
+  id        String   @id @default(cuid())
+  userId    String
+  listingId String
+  createdAt DateTime @default(now())
+
+  user    user            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing FranchiseListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingId])
+  @@index([userId])
+  @@map("saved_listings")
+}
+
+// =====================================================================
+// 4. ROLE-SPECIFIC PROFILES
+// =====================================================================
+model FranchiseeProfile {
+  userId                String              @id
+  investmentCapacityMin Decimal?            @db.Decimal(14, 2)
+  investmentCapacityMax Decimal?            @db.Decimal(14, 2)
+  liquidCapital         Decimal?            @db.Decimal(14, 2)
+  netWorth              Decimal?            @db.Decimal(14, 2)
+  experienceBackground  String?
+  timeline              TimelineToPurchase?
+  creditScoreBand       String?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  // Relations
+  user              user                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  industryInterests FranchiseeIndustryInterest[]
+  locationInterests FranchiseeLocationInterest[]
+
+  @@map("franchisee_profiles")
+}
+
+model FranchiseeIndustryInterest {
+  franchiseeUserId String
+  industryId       String
+
+  // Relations
+  franchiseeProfile FranchiseeProfile @relation(fields: [franchiseeUserId], references: [userId], onDelete: Cascade)
+  industry          Industry          @relation(fields: [industryId], references: [id], onDelete: Cascade)
+
+  @@id([franchiseeUserId, industryId])
+  @@map("franchisee_industry_interests")
+}
+
+model FranchiseeLocationInterest {
+  id               String  @id @default(cuid())
+  franchiseeUserId String
+  countryCode      String? @db.Char(2)
+  stateProvince    String?
+  city             String?
+
+  // Relations
+  franchiseeProfile FranchiseeProfile @relation(fields: [franchiseeUserId], references: [userId], onDelete: Cascade)
+
+  @@index([franchiseeUserId])
+  @@map("franchisee_location_interests")
+}
+
+model BrokerProfile {
+  userId          String   @id
+  brokerageOrgId  String?
+  licenseNumber   String?
+  licenseState    String?
+  yearsExperience Int?
+  bio             String?
+  certifications  Json     @default("[]")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user            user                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  brokerageOrg    Organization?          @relation(fields: [brokerageOrgId], references: [id], onDelete: SetNull)
+  representations BrokerRepresentation[]
+
+  @@index([brokerageOrgId])
+  @@map("broker_profiles")
+}
+
+model BrokerRepresentation {
+  id               String    @id @default(cuid())
+  brokerUserId     String
+  franchisorOrgId  String
+  franchiseBrandId String?
+  commissionNotes  String?
+  isActive         Boolean   @default(true)
+  startedAt        DateTime  @default(now())
+  endedAt          DateTime?
+
+  // Relations
+  brokerProfile  BrokerProfile   @relation(fields: [brokerUserId], references: [userId], onDelete: Cascade)
+  franchisorOrg  Organization    @relation("franchisor_org", fields: [franchisorOrgId], references: [id], onDelete: Cascade)
+  franchiseBrand FranchiseBrand? @relation(fields: [franchiseBrandId], references: [id], onDelete: Cascade)
+
+  @@unique([brokerUserId, franchisorOrgId, franchiseBrandId])
+  @@index([brokerUserId])
+  @@index([franchisorOrgId])
+  @@map("broker_representations")
+}
+
+// =====================================================================
+// 5. CRM / DEAL PIPELINE
+// =====================================================================
+model Lead {
+  id                 String     @id @default(cuid())
+  franchiseListingId String
+  franchiseeUserId   String
+  brokerUserId       String?
+  source             LeadSource @default(platform_search)
+  status             LeadStatus @default(new)
+  notes              String?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  // Relations
+  franchiseListing FranchiseListing @relation(fields: [franchiseListingId], references: [id], onDelete: Cascade)
+  franchiseeUser   user             @relation("lead_franchisee", fields: [franchiseeUserId], references: [id], onDelete: Cascade)
+  brokerUser       user?            @relation("lead_broker", fields: [brokerUserId], references: [id], onDelete: SetNull)
+  deal             Deal?
+
+  @@unique([franchiseListingId, franchiseeUserId])
+  @@index([franchiseListingId])
+  @@index([franchiseeUserId])
+  @@index([brokerUserId])
+  @@index([status])
+  @@map("leads")
+}
+
+model Deal {
+  id                  String           @id @default(cuid())
+  leadId              String           @unique
+  franchiseListingId  String
+  franchiseeUserId    String
+  brokerUserId        String?
+  franchisorContactId String?
+  stage               DealStage        @default(inquiry)
+  estimatedValue      Decimal?         @db.Decimal(14, 2)
+  probabilityPct      Int?
+  expectedCloseDate   DateTime?
+  actualCloseDate     DateTime?
+  closedStatus        DealClosedStatus @default(open)
+  lostReason          String?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  // Relations
+  lead              Lead               @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  franchiseListing  FranchiseListing   @relation(fields: [franchiseListingId], references: [id], onDelete: Restrict)
+  franchiseeUser    user               @relation("franchisee", fields: [franchiseeUserId], references: [id], onDelete: Restrict)
+  brokerUser        user?              @relation("broker", fields: [brokerUserId], references: [id], onDelete: SetNull)
+  franchisorContact user?              @relation("franchisor_contact", fields: [franchisorContactId], references: [id], onDelete: SetNull)
+  stageHistory      DealStageHistory[]
+  documents         Document[]
+
+  @@index([franchiseListingId])
+  @@index([franchiseeUserId])
+  @@index([brokerUserId])
+  @@index([stage])
+  @@map("deals")
+}
+
+model DealStageHistory {
+  id        String     @id @default(cuid())
+  dealId    String
+  fromStage DealStage?
+  toStage   DealStage
+  changedBy String?
+  changedAt DateTime   @default(now())
+  notes     String?
+
+  // Relations
+  deal Deal  @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  user user? @relation(fields: [changedBy], references: [id], onDelete: SetNull)
+
+  @@index([dealId, changedAt])
+  @@map("deal_stage_history")
+}
+
+// =====================================================================
+// 6. DOCUMENTS
+// =====================================================================
+model Document {
+  id               String       @id @default(cuid())
+  franchiseBrandId String?
+  dealId           String?
+  organizationId   String?
+  documentType     DocumentType
+  fileName         String
+  fileUrl          String
+  fileSizeBytes    BigInt?
+  uploadedById     String
+  createdAt        DateTime     @default(now())
+
+  // Relations
+  franchiseBrand FranchiseBrand? @relation(fields: [franchiseBrandId], references: [id], onDelete: Cascade)
+  deal           Deal?           @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  organization   Organization?   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  uploadedBy     user            @relation(fields: [uploadedById], references: [id], onDelete: Restrict)
+
+  @@index([franchiseBrandId])
+  @@index([dealId])
+  @@index([organizationId])
+  @@map("documents")
+}
+
+// =====================================================================
+// 7. NETWORKING
+// =====================================================================
+model Connection {
+  id          String           @id @default(cuid())
+  requesterId String
+  addresseeId String
+  status      ConnectionStatus @default(pending)
+  requestedAt DateTime         @default(now())
+  respondedAt DateTime?
+
+  // Relations
+  requester user @relation("requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee user @relation("addressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, addresseeId])
+  @@index([requestedAt])
+  @@map("connections")
+}
+
+model Conversation {
+  id        String           @id @default(cuid())
+  type      ConversationType
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  // Relations
+  messages Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  senderId       String
+  recipientId    String?
+  content        String
+  createdAt      DateTime @default(now())
+
+  // Relations
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       user         @relation("sender", fields: [senderId], references: [id], onDelete: Cascade)
+  recipient    user?        @relation("recipient", fields: [recipientId], references: [id], onDelete: SetNull)
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([recipientId])
+  @@map("messages")
+}
+
+// =====================================================================
+// 8. SOCIAL FEATURES
+// =====================================================================
+model Post {
+  id         String         @id @default(cuid())
+  userId     String
+  content    String
+  visibility PostVisibility @default(public)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  deletedAt  DateTime?
+
+  // Relations
+  user     user      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments Comment[]
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("posts")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user user @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@index([userId])
+  @@map("comments")
+}
+
+model Review {
+  id        String       @id @default(cuid())
+  userId    String
+  content   String
+  rating    Int
+  status    ReviewStatus @default(pending)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  // Relations
+  user user @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("reviews")
 }

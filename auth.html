@@ -94,7 +94,7 @@
   }
   .theme-toggle:hover{background:var(--surface-2);}
   .theme-toggle:hover{border-color:var(--primary);}
-  .role-row{display:grid; grid-template-columns:repeat(3,minmax(140px,1fr)); gap:14px; margin-bottom:24px;}
+  .role-row{display:grid; grid-template-columns:repeat(2,minmax(180px,1fr)); gap:14px; margin-bottom:24px;}
   .role-option{border:1px solid var(--border); border-radius:18px; padding:18px; cursor:pointer; transition:border-color .2s, background .2s;}
   .role-option input{display:none;}
   .role-option h4{margin-bottom:6px; font-size:15px;}
@@ -128,7 +128,7 @@
     <div class="section-head">
       <div class="eyebrow">Auth & onboarding</div>
       <h1>Login or sign up to FranchiseHub</h1>
-      <p>Login is unified for all roles. Sign up uses a role picker so franchisors, brokers, and franchisees only see the fields that matter.</p>
+      <p>Login is unified for all roles. Sign up uses a role picker so franchisors and franchisees only see the fields that matter.</p>
     </div>
 
     <div class="tabs">
@@ -148,7 +148,7 @@
             </div>
             <div class="field full">
               <label for="loginPassword">Password</label>
-              <input id="loginPassword" name="password" type="password" placeholder="Enter your password" required>
+              <input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
             </div>
             <div class="field">
               <label class="checkbox-row"><input type="checkbox" id="rememberMe"><span>Remember me</span></label>
@@ -173,11 +173,6 @@
               <h4>Franchisor</h4>
               <p>Set up a brand-backed company profile.</p>
             </label>
-            <label class="role-option" data-role="broker">
-              <input type="radio" name="signupRole" value="broker">
-              <h4>Broker</h4>
-              <p>Create a brokerage profile and manage brand relationships.</p>
-            </label>
             <label class="role-option" data-role="franchisee">
               <input type="radio" name="signupRole" value="franchisee">
               <h4>Franchisee</h4>
@@ -200,11 +195,11 @@
             </div>
             <div class="field">
               <label for="signupPassword">Password</label>
-              <input id="signupPassword" name="password" type="password" placeholder="Create a password" required>
+              <input id="signupPassword" name="password" type="password" autocomplete="new-password" placeholder="Create a password" required>
             </div>
             <div class="field">
               <label for="signupConfirm">Confirm password</label>
-              <input id="signupConfirm" name="confirmPassword" type="password" placeholder="Retype password" required>
+              <input id="signupConfirm" name="confirmPassword" type="password" autocomplete="new-password" placeholder="Retype password" required>
             </div>
             <div class="field">
               <label for="phone">Phone (optional)</label>
@@ -249,27 +244,7 @@
             </div>
           </div>
 
-          <div class="role-fields" data-role="broker">
-            <h3>Broker details</h3>
-            <div class="form-grid">
-              <div class="field full">
-                <label for="brokerage">Brokerage name</label>
-                <input id="brokerage" name="brokerage" type="text" placeholder="Brokerage or independent">
-              </div>
-              <div class="field">
-                <label for="licenseNumber">License number</label>
-                <input id="licenseNumber" name="licenseNumber" type="text" placeholder="License number">
-              </div>
-              <div class="field">
-                <label for="licenseState">License state</label>
-                <input id="licenseState" name="licenseState" type="text" placeholder="State or region">
-              </div>
-              <div class="field full">
-                <label for="experience">Years of experience</label>
-                <input id="experience" name="experience" type="number" min="0" placeholder="Years">
-              </div>
-            </div>
-          </div>
+
 
           <div class="role-fields" data-role="franchisee">
             <h3>Franchisee preferences</h3>
@@ -312,7 +287,7 @@
           </div>
 
           <div class="form-help">
-            <strong>Note:</strong> Login is unified for every user. Signup roles diverge because the shared `users` table stores auth and profile information, while franchisor/broker/franchisee details map to role-specific tables later when the backend is connected.
+            <strong>Note:</strong> Login is unified for every user. Signup roles diverge because the shared `users` table stores auth and profile information, while franchisor and franchisee details map to role-specific tables later when the backend is connected.
           </div>
 
           <div class="form-footer">
@@ -367,15 +342,115 @@
 
   setRole('franchisor');
 
-  document.getElementById('loginForm').addEventListener('submit', event => {
+  // =====================================================================
+  // LOGIN HANDLER
+  // =====================================================================
+  document.getElementById('loginForm').addEventListener('submit', async (event) => {
     event.preventDefault();
-    alert('Login submitted. Backend integration with Prisma will connect this form to the shared users table.');
+    
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const rememberMe = document.getElementById('rememberMe').checked;
+    
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Logging in...';
+
+    try {
+      const result = await auth.login(email, password, rememberMe);
+      
+      // Show success message
+      alert(`Welcome back, ${result.user.firstName}! Redirecting to dashboard...`);
+      
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 500);
+    } catch (error) {
+      alert(`Login failed: ${error.message}`);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+    }
   });
 
-  document.getElementById('signupForm').addEventListener('submit', event => {
+  // =====================================================================
+  // SIGNUP HANDLER
+  // =====================================================================
+  document.getElementById('signupForm').addEventListener('submit', async (event) => {
     event.preventDefault();
-    alert('Signup submitted. Role-specific payloads will be wired to users + role tables when Prisma backend is available.');
+    
+    const role = document.querySelector('input[name="signupRole"]:checked').value;
+    
+    // Collect shared fields
+    const formData = {
+      firstName: document.getElementById('firstName').value,
+      lastName: document.getElementById('lastName').value,
+      email: document.getElementById('signupEmail').value,
+      password: document.getElementById('signupPassword').value,
+      confirmPassword: document.getElementById('signupConfirm').value,
+      phone: document.getElementById('phone').value,
+      location: document.getElementById('location').value,
+      role: role,
+    };
+
+    // Validate password match
+    if (formData.password !== formData.confirmPassword) {
+      alert('Passwords do not match!');
+      return;
+    }
+
+    // Collect role-specific fields
+    if (role === 'franchisor') {
+      formData.companyName = document.getElementById('companyName').value;
+      formData.website = document.getElementById('website').value;
+      formData.industry = document.getElementById('industry').value;
+      formData.title = document.getElementById('title').value;
+      formData.companySize = document.getElementById('companySize').value;
+    } else if (role === 'franchisee') {
+      formData.investmentMin = document.getElementById('investmentMin').value;
+      formData.investmentMax = document.getElementById('investmentMax').value;
+      formData.liquidCapital = document.getElementById('liquidCapital').value;
+      formData.netWorth = document.getElementById('netWorth').value;
+      formData.timeline = document.getElementById('timeline').value;
+      formData.industries = document.getElementById('industries').value;
+      formData.locations = document.getElementById('locations').value;
+    }
+
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating account...';
+
+    try {
+      const result = await auth.signup(formData);
+      
+      alert(`Welcome to FranchiseHub, ${result.user.firstName}! Account created successfully. Redirecting to dashboard...`);
+      
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 500);
+    } catch (error) {
+      alert(`Signup failed: ${error.message}`);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+    }
+  });
+
+  // =====================================================================
+  // CHECK IF ALREADY LOGGED IN
+  // =====================================================================
+  window.addEventListener('load', async () => {
+    const currentUser = await auth.getCurrentUser();
+    if (currentUser) {
+      // User is already logged in, redirect to dashboard
+      console.log('User already logged in:', currentUser);
+      // Uncomment to auto-redirect logged-in users
+      // window.location.href = 'landing-page.html';
+    }
   });
 </script>
+<script src="js/auth-client.js"></script>
 </body>
 </html>
